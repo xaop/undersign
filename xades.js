@@ -62,6 +62,7 @@ var BDOC_POLICY = {
 // The XAdES profiles are described in https://www.etsi.org/deliver/etsi_ts/103100_103199/103171/02.01.01_60/ts_103171v020101p.pdf.
 function Xades(cert, files, opts) {
 	this.certificate = cert
+	var certChain = opts.certChain || [cert]
 
 	var signedProperties = {
 		Id: "signed-properties",
@@ -72,7 +73,7 @@ function Xades(cert, files, opts) {
 			// element.
 			//
 			// TODO: Confirm whether this can include milliseconds or not.
-			xades$SigningTime: {$: formatIsoDateTime(new Date)},
+			xades$SigningTime: {$: (opts && opts.timestamp) || formatIsoDateTime(new Date)},
 
 			xades$SigningCertificate: {
 				xades$Cert: {
@@ -170,10 +171,10 @@ function Xades(cert, files, opts) {
 			ds$Signature: {
 				Id: "signature",
 				ds$SignedInfo: signedInfo,
-				ds$SignatureValue: {},
+				ds$SignatureValue: { Id: 'signature-value' },
 
 				ds$KeyInfo: {
-					ds$X509Data: {ds$X509Certificate: {$: cert.toString("base64")}}
+					ds$X509Data: certChain.map((c) => ({ds$X509Certificate: {$: c.toString("base64")}}))
 				},
 
 				ds$Object: {
@@ -287,6 +288,12 @@ Xades.prototype.setTimestamp = function(stamp) {
 	props = props.xades$UnsignedSignatureProperties
 
 	props.xades$SignatureTimeStamp = {
+		xades$HashDataInfo: {
+			URI: '#signature-value',
+			ds$Transforms: {
+				ds$Transform: {Algorithm: C14N_URL}
+			}
+		},
 		xades$EncapsulatedTimeStamp: {
 			$: serializeTimestamp(stamp).toString("base64")
 		}

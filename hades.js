@@ -44,8 +44,8 @@ Hades.prototype.timestamp = function(xades) {
 	return Timestamp.read(this.timestampUrl, digest)
 }
 
-Hades.prototype.ocsp = function(cert) {
-	var issuer = this.certificates.getIssuer(cert)
+Hades.prototype.ocsp = function(cert, issuer) {
+	issuer = issuer || this.certificates.getIssuer(cert)
 	if (issuer == null) throw new Error(
 		"Can't find issuer: " + cert.issuerDistinguishedName.join(", ")
 	)
