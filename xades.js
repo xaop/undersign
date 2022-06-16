@@ -288,11 +288,11 @@ Xades.prototype.setTimestamp = function(stamp) {
 	props = props.xades$UnsignedSignatureProperties
 
 	props.xades$SignatureTimeStamp = {
-		xades$HashDataInfo: {
+		xades$Include: {
 			URI: '#signature-value',
-			ds$Transforms: {
-				ds$Transform: {Algorithm: C14N_URL}
-			}
+		},
+		ds$CanonicalizationMethod: {
+			Algorithm: C14N_URL
 		},
 		xades$EncapsulatedTimeStamp: {
 			$: serializeTimestamp(stamp).toString("base64")
